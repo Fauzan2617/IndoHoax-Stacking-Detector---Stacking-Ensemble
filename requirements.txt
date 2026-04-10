@@ -1,0 +1,19 @@
+# Data Manipulation
+pandas
+numpy
+
+# Machine Learning & Evaluation
+scikit-learn
+joblib
+
+# Natural Language Processing (NLP)
+Sastrawi
+nltk
+
+# Visualization
+matplotlib
+seaborn
+
+# Development Environment
+jupyter
+ipykernel

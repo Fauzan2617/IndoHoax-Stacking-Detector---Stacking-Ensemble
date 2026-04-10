@@ -1,0 +1,22 @@
+# Python Environment
+venv/
+env/
+.env
+
+# Python Caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook Caches
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Data & Models (Sangat direkomendasikan untuk diabaikan jika ukurannya besar)
+data/processed/*.pkl
+data/processed/*.csv
+models/*.pkl
+
+# OS Metadata
+.DS_Store
+Thumbs.db
