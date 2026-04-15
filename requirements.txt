@@ -17,3 +17,6 @@ seaborn
 # Development Environment
 jupyter
 ipykernel
+
+# UI
+streamlit

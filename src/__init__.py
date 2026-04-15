@@ -1,2 +1,2 @@
-from .preprocessor import bersihkan_teks_minimal,bersihkan_teks_total
+from .preprocessor import bersihkan_teks_minimal,bersihkan_teks_total,encode_label_series
 from .utils import simpan_objek,load_objek

@@ -1,88 +1,113 @@
-import re  # Library untuk manipulasi teks menggunakan Regular Expression (regex)
+import re  # Library untuk manipulasi teks (regex)
 
-# Import library Sastrawi untuk NLP Bahasa Indonesia
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory  # Untuk stemming (mengubah kata ke bentuk dasar)
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory  # Untuk menghapus stopword
-
-# ============================================================
-# Inisialisasi Sastrawi (dilakukan sekali saja, bukan di dalam fungsi)
-# Tujuannya agar lebih efisien dan tidak dibuat ulang setiap pemanggilan fungsi
-# ============================================================
-
-stemmer = StemmerFactory().create_stemmer()  
-# Membuat objek stemmer → contoh: "berlari" → "lari"
-
-stopword = StopWordRemoverFactory().create_stop_word_remover()  
-# Membuat objek stopword remover → menghapus kata umum seperti "dan", "yang", "di", dll
+# Import Sastrawi untuk NLP Bahasa Indonesia
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 
 # ============================================================
-# Fungsi preprocessing lengkap (untuk training model utama)
+# Inisialisasi Sastrawi (sekali saja)
+# ============================================================
+
+stemmer = StemmerFactory().create_stemmer()
+stopword = StopWordRemoverFactory().create_stop_word_remover()
+
+
+# ============================================================
+# 🔥 Encoding Label + Cleaning Label
+# ============================================================
+
+def clean_label(label):
+    """
+    Membersihkan label dari noise seperti:
+    - spasi
+    - huruf besar/kecil
+    - karakter aneh
+    
+    Contoh:
+    ' HOAX ' → 'hoax'
+    """
+    return str(label).strip().lower()
+
+
+def encode_label(label):
+    """
+    Mengubah label teks menjadi numerik.
+
+    Mapping:
+    - valid → 0
+    - hoax  → 1
+
+    Label lain akan dikembalikan sebagai None
+    agar bisa difilter.
+    """
+
+    mapping = {
+        'valid': 0,
+        'hoax': 1
+    }
+
+    label = clean_label(label)
+
+    return mapping.get(label, None)  
+    # 🔥 kalau tidak ada di mapping → None (bukan error)
+
+
+def encode_label_series(series):
+    """
+    Encode seluruh kolom label + otomatis buang label tidak valid.
+
+    Return:
+    - Series label numerik
+    - Sudah bersih dari data aneh (misal '?')
+    """
+
+    encoded = series.apply(encode_label)
+
+    # 🔥 Filter data yang None (label tidak valid seperti '?')
+    valid_mask = encoded.notnull()
+
+    return encoded[valid_mask], valid_mask
+
+
+# ============================================================
+# Fungsi preprocessing teks (FULL)
 # ============================================================
 
 def bersihkan_teks_total(teks):
     """
-    Fungsi untuk membersihkan teks secara menyeluruh (full preprocessing).
-    
-    Tahapan:
-    1. Lowercase
-    2. Hapus URL
-    3. Hapus mention & hashtag
-    4. Hapus karakter non-alfabet
-    5. Hapus stopword
-    6. Stemming
-    
-    Cocok digunakan untuk training model utama agar performa maksimal.
+    Preprocessing lengkap:
+    - lowercase
+    - hapus URL
+    - hapus mention & hashtag
+    - hapus non huruf
+    - hapus stopword
+    - stemming
     """
 
-    teks = str(teks).lower()  
-    # Mengubah teks menjadi string dan huruf kecil semua (normalisasi)
+    teks = str(teks).lower()
 
-    teks = re.sub(r'http\S+|www\S+|https\S+', '', teks, flags=re.MULTILINE)  
-    # Menghapus URL (http, https, www)
-    # \S+ → semua karakter non-spasi setelah http/www
+    teks = re.sub(r'http\S+|www\S+|https\S+', '', teks, flags=re.MULTILINE)
+    teks = re.sub(r'\@\w+|\#', '', teks)
+    teks = re.sub(r'[^a-zA-Z\s]', '', teks)
 
-    teks = re.sub(r'\@\w+|\#', '', teks)  
-    # Menghapus mention (@username) dan simbol hashtag (#)
+    teks = stopword.remove(teks)
+    teks = stemmer.stem(teks)
 
-    teks = re.sub(r'[^a-zA-Z\s]', '', teks)  
-    # Menghapus semua karakter selain huruf (a-z, A-Z) dan spasi
-    # Contoh: angka, simbol, tanda baca akan hilang
-
-    teks = stopword.remove(teks)  
-    # Menghapus stopword (kata umum yang tidak penting)
-    # Contoh: "dan", "yang", "di", dll
-
-    teks = stemmer.stem(teks)  
-    # Mengubah kata ke bentuk dasar (stemming)
-    # Contoh: "berlari", "lari-lari" → "lari"
-
-    return teks  
-    # Mengembalikan teks yang sudah dibersihkan total
+    return teks
 
 
 # ============================================================
-# Fungsi preprocessing minimal (untuk simulasi data noisy)
+# Fungsi preprocessing teks (MINIMAL)
 # ============================================================
 
 def bersihkan_teks_minimal(teks):
     """
-    Fungsi preprocessing sederhana (minimal cleaning).
-    
-    Tahapan:
-    1. Lowercase
-    2. Hapus URL saja
-    
-    Digunakan untuk:
-    - Simulasi data dunia nyata (noisy data)
-    - Uji robustness model
+    Preprocessing minimal (untuk simulasi noisy data)
     """
 
-    teks = str(teks).lower()  
-    # Normalisasi teks ke huruf kecil
+    teks = str(teks).lower()
 
-    teks = re.sub(r'http\S+|www\S+|https\S+', '', teks, flags=re.MULTILINE)  
-    # Hanya menghapus URL, tanpa preprocessing lain
+    teks = re.sub(r'http\S+|www\S+|https\S+', '', teks, flags=re.MULTILINE)
 
-    return teks  
-    # Mengembalikan teks yang masih "kotor" (realistic scenario)
+    return teks
