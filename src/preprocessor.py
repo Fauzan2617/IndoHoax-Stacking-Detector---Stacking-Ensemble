@@ -55,19 +55,14 @@ def encode_label(label):
 
 def encode_label_series(series):
     """
-    Encode seluruh kolom label + otomatis buang label tidak valid.
-
-    Return:
-    - Series label numerik
-    - Sudah bersih dari data aneh (misal '?')
+    Encode label + return full series (tidak dipotong)
     """
 
     encoded = series.apply(encode_label)
 
-    # 🔥 Filter data yang None (label tidak valid seperti '?')
     valid_mask = encoded.notnull()
 
-    return encoded[valid_mask], valid_mask
+    return encoded, valid_mask
 
 
 # ============================================================

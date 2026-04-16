@@ -69,12 +69,13 @@ if vectorizer and model:
                 # 🔥 4. THRESHOLD BARU (LEBIH KETAT)
                 threshold = 0.85
 
-                if prob_hoax > threshold:
+                # 🔥 Zona keputusan yang lebih stabil
+                if prob_hoax >= 0.75:
                     label = "🚨 Berpotensi Hoaks"
                     warna = "error"
                     confidence = prob_hoax
 
-                elif prob_hoax > 0.6:
+                elif prob_hoax >= 0.55:
                     label = "⚠️ Perlu Verifikasi"
                     warna = "warning"
                     confidence = prob_hoax
