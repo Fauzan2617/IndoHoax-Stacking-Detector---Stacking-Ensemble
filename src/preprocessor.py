@@ -12,59 +12,6 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 stemmer = StemmerFactory().create_stemmer()
 stopword = StopWordRemoverFactory().create_stop_word_remover()
 
-
-# ============================================================
-# Encoding Label + Cleaning Label
-# ============================================================
-
-def clean_label(label):
-    """
-    Membersihkan label dari noise seperti:
-    - spasi
-    - huruf besar/kecil
-    - karakter aneh
-    
-    Contoh:
-    ' HOAX ' → 'hoax'
-    """
-    return str(label).strip().lower()
-
-
-def encode_label(label):
-    """
-    Mengubah label teks menjadi numerik.
-
-    Mapping:
-    - valid → 0
-    - hoax  → 1
-
-    Label lain akan dikembalikan sebagai None
-    agar bisa difilter.
-    """
-
-    mapping = {
-        'valid': 0,
-        'hoax': 1
-    }
-
-    label = clean_label(label)
-
-    return mapping.get(label, None)  
-    # 🔥 kalau tidak ada di mapping → None (bukan error)
-
-
-def encode_label_series(series):
-    """
-    Encode label + return full series (tidak dipotong)
-    """
-
-    encoded = series.apply(encode_label)
-
-    valid_mask = encoded.notnull()
-
-    return encoded, valid_mask
-
-
 # ============================================================
 # Fungsi preprocessing teks (FULL)
 # ============================================================
