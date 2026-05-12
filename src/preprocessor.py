@@ -14,7 +14,7 @@ stopword = StopWordRemoverFactory().create_stop_word_remover()
 
 
 # ============================================================
-# 🔥 Encoding Label + Cleaning Label
+# Encoding Label + Cleaning Label
 # ============================================================
 
 def clean_label(label):
